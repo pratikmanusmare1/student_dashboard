@@ -10,17 +10,11 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    /**
-     * Show the home page
-     */
     public function home()
     {
         return view('home');
     }
 
-    /**
-     * Show the dashboard for authenticated users
-     */
     public function dashboard()
     {
         return view('dashboard');
@@ -56,9 +50,7 @@ class AuthController extends Controller
         return redirect()->route('dashboard')->with('success', 'Registration successful! Welcome to your dashboard.');
     }
 
-    /**
-     * Handle user login
-     */
+ 
     public function login(Request $request)
     {
         // Validate the request
@@ -84,9 +76,6 @@ class AuthController extends Controller
         ])->withInput()->with('login_error', true);
     }
 
-    /**
-     * Handle user logout
-     */
     public function logout(Request $request)
     {
         Auth::logout();
