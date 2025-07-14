@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+<!-- Success/Error Messages -->
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999;" role="alert">
+        <i class="bi bi-check-circle"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
 <!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
     <div class="container">
@@ -24,12 +31,36 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#contact">Contact Us</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Sign In</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#signupModal">Sign Up</a>
-                </li>
+
+                @auth
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('dashboard') }}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> {{ Auth::user()->name }}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                @else
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Sign In</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#signupModal">Sign Up</a>
+                    </li>
+                @endauth
             </ul>
         </div>
     </div>
@@ -55,7 +86,8 @@
             </div>
             <div class="col-lg-6">
                 <div class="text-center">
-                    <i class="bi bi-laptop display-1 opacity-75"></i>
+                    <!-- <i class="bi bi-laptop display-1 opacity-75"></i> -->
+                     <img src="{{ asset('img/stud.png') }}">
                 </div>
             </div>
         </div>
@@ -106,10 +138,10 @@
             <div class="col-lg-6">
                 <h3>Why Choose Us?</h3>
                 <ul class="list-unstyled">
-                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Expert team with years of experience</li>
+                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Expert team</li>
                     <li><i class="bi bi-check-circle-fill text-primary me-2"></i>24/7 customer support</li>
-                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Cutting-edge technology stack</li>
-                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Affordable pricing plans</li>
+                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i>multiple technology stack</li>
+                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Affordable pricing</li>
                 </ul>
             </div>
         </div>
@@ -122,7 +154,7 @@
         <div class="row">
             <div class="col-lg-12 text-center mb-5">
                 <h2 class="display-5 fw-bold">Contact Us</h2>
-                <p class="lead">Get in touch with us. We'd love to hear from you!</p>
+                <p class="lead">Get in touch with us.</p>
             </div>
         </div>
         
@@ -159,26 +191,41 @@
                 <h5 class="modal-title" id="loginModalLabel">Sign In</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form>
+            <form action="{{ route('login') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    @if($errors->any() && session('login_error'))
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <div class="mb-3">
                         <label for="loginEmail" class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="loginEmail" required>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror"
+                               id="loginEmail" name="email" value="{{ old('email') }}" required>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label for="loginPassword" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="loginPassword" required>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror"
+                               id="loginPassword" name="password" required>
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="rememberMe">
-                        <label class="form-check-label" for="rememberMe">Remember me</label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Sign In</button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Sign In</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -191,29 +238,61 @@
                 <h5 class="modal-title" id="signupModalLabel">Sign Up</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form>
+            <form action="{{ route('register') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    @if($errors->any() && session('signup_error'))
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="signupFirstName" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="signupFirstName" required>
+                            <input type="text" class="form-control @error('first_name') is-invalid @enderror"
+                                   id="signupFirstName" name="first_name" value="{{ old('first_name') }}" required>
+                            @error('first_name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="signupLastName" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="signupLastName" required>
+                            <input type="text" class="form-control @error('last_name') is-invalid @enderror"
+                                   id="signupLastName" name="last_name" value="{{ old('last_name') }}" required>
+                            @error('last_name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                     <div class="mb-3">
                         <label for="signupEmail" class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="signupEmail" required>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror"
+                               id="signupEmail" name="email" value="{{ old('email') }}" required>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label for="signupPassword" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="signupPassword" required>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror"
+                               id="signupPassword" name="password" required>
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <div class="form-text">Password must be at least 8 characters long.</div>
                     </div>
                     <div class="mb-3">
                         <label for="confirmPassword" class="form-label">Confirm Password</label>
-                        <input type="password" class="form-control" id="confirmPassword" required>
+                        <input type="password" class="form-control @error('password_confirmation') is-invalid @enderror"
+                               id="confirmPassword" name="password_confirmation" required>
+                        @error('password_confirmation')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="agreeTerms" required>
@@ -221,13 +300,41 @@
                             I agree to the <a href="#" class="text-decoration-none">Terms and Conditions</a>
                         </label>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Sign Up</button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<!-- JavaScript for handling modal display on validation errors -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show login modal if there are login errors
+    @if(session('login_error'))
+        var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.show();
+    @endif
+
+    // Show signup modal if there are signup errors
+    @if(session('signup_error'))
+        var signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
+        signupModal.show();
+    @endif
+
+    // Auto-hide success messages after 5 seconds
+    setTimeout(function() {
+        var alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            var bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+});
+</script>
 @endsection
+
+

@@ -6,6 +6,6 @@
     <title>Document</title>
 </head>
 <body>
-    
+    this is the landing page od student dashboard
 </body>
 </html>
